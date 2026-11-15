@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'module_detail_screen.dart';
 import 'services/app_services.dart';
 import 'ar_camera_screen.dart';
+import 'theme/app_theme.dart';
 
 class ModuleListScreen extends StatefulWidget {
   const ModuleListScreen({super.key});
@@ -16,6 +17,14 @@ class _ModuleListScreenState extends State<ModuleListScreen>
     with AutomaticKeepAliveClientMixin {
   bool _isLoading = true;
   List<dynamic> _modules = [];
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedFilter = 'Semua';
+  static const List<String> _filters = [
+    'Semua',
+    'Belum mulai',
+    'Berlangsung',
+    'Selesai',
+  ];
 
   @override
   bool get wantKeepAlive => true;
@@ -36,6 +45,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
 
   @override
   void dispose() {
+    _searchController.dispose();
     AppSession.instance.dataVersion.removeListener(_onDataChanged);
     AppSession.instance.tabIndex.removeListener(_onTabChanged);
     super.dispose();
@@ -139,14 +149,30 @@ class _ModuleListScreenState extends State<ModuleListScreen>
     );
   }
 
+  List<dynamic> _filteredModules() {
+    final query = _searchController.text.trim().toLowerCase();
+    return _modules.where((module) {
+      final title = (module['judul'] ?? '').toString().toLowerCase();
+      final matchesQuery = query.isEmpty || title.contains(query);
+      final progress = (module['progress'] as num?)?.toDouble() ?? 0;
+      final matchesFilter = switch (_selectedFilter) {
+        'Belum mulai' => progress <= 0,
+        'Berlangsung' => progress > 0 && progress < 1,
+        'Selesai' => progress >= 1,
+        _ => true,
+      };
+      return matchesQuery && matchesFilter;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     final primaryGreen = Theme.of(context).primaryColor;
+    final filteredModules = _filteredModules();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Latar belakang Off-White
-      // KITA HAPUS APPBAR AGAR BISA MENGGUNAKAN HEADER OVERLAPPING
+      backgroundColor: AppColors.background,
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primaryGreen))
           : RefreshIndicator(
@@ -156,70 +182,177 @@ class _ModuleListScreenState extends State<ModuleListScreen>
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 120),
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Stack(
                   children: [
-                    // ==========================================
-                    // 1. HEADER HIJAU MELENGKUNG (KONSISTEN DENGAN HOME)
-                    // ==========================================
-                    Container(
-                      height: 240, // Sedikit lebih tinggi untuk menampung teks deskripsi
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(32),
-                        ),
-                      ),
-                    ),
-
-                    // ==========================================
-                    // 2. KONTEN UTAMA
-                    // ==========================================
                     SafeArea(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // --- TEKS HEADER ---
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Katalog Modul',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                            padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    AppColors.primary,
+                                    AppColors.primaryContainer,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Eksplorasi materi pembelajaran dan gunakan fitur Augmented Reality untuk pemahaman yang lebih nyata.',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                    height: 1.4,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.18,
+                                    ),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.view_in_ar_rounded,
+                                        size: 15,
+                                        color: AppColors.mint,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'INTERAKTIF & 3D',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.9,
+                                          ),
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.8,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'Katalog Modul',
+                                    style: TextStyle(
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Eksplorasi materi dan gunakan Augmented Reality untuk memahami konsep lebih nyata.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-
-                          // --- DAFTAR KARTU MODUL OVERLAPPING ---
-                          if (_modules.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 6, 20, 12),
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (_) => setState(() {}),
+                              decoration: InputDecoration(
+                                hintText: 'Cari materi atau topik...',
+                                prefixIcon: const Icon(Icons.search_rounded),
+                                suffixIcon: _searchController.text.isEmpty
+                                    ? null
+                                    : IconButton(
+                                        tooltip: 'Hapus pencarian',
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() {});
+                                        },
+                                        icon: const Icon(Icons.close_rounded),
+                                      ),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 36,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _filters.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(width: 8),
+                              itemBuilder: (context, index) {
+                                final filter = _filters[index];
+                                final selected = filter == _selectedFilter;
+                                return ChoiceChip(
+                                  label: Text(filter),
+                                  selected: selected,
+                                  showCheckmark: false,
+                                  onSelected: (_) =>
+                                      setState(() => _selectedFilter = filter),
+                                  backgroundColor: Colors.white,
+                                  selectedColor: primaryGreen.withValues(
+                                    alpha: 0.12,
+                                  ),
+                                  labelStyle: TextStyle(
+                                    color: selected
+                                        ? primaryGreen
+                                        : Colors.grey.shade700,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  side: BorderSide(
+                                    color: selected
+                                        ? primaryGreen.withValues(alpha: 0.35)
+                                        : Colors.grey.shade200,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          if (filteredModules.isEmpty)
                             Center(
                               child: Container(
                                 margin: const EdgeInsets.symmetric(
-                                  horizontal: 24,
+                                  horizontal: 20,
                                 ),
                                 padding: const EdgeInsets.all(24),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: const Text('Belum ada modul tersedia.'),
+                                child: Text(
+                                  _modules.isEmpty
+                                      ? 'Belum ada modul tersedia.'
+                                      : 'Modul tidak ditemukan. Coba kata kunci atau filter lain.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.grey.shade700),
+                                ),
                               ),
                             )
                           else
@@ -227,13 +360,13 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                               shrinkWrap: true, // Penting agar bisa masuk ke dalam SingleChildScrollView
                               physics: const NeverScrollableScrollPhysics(), // Scroll diambil alih oleh parent
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
+                                horizontal: 20,
                               ),
-                              itemCount: _modules.length,
+                              itemCount: filteredModules.length,
                               separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 12),
                               itemBuilder: (context, index) {
-                                final module = _modules[index];
+                                final module = filteredModules[index];
                                 final double progressValue =
                                     (module['progress'] as num?)?.toDouble() ??
                                     0.0;
@@ -299,20 +432,20 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                   ).then((_) => _fetchModules());
                 },
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(14.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // KOTAK NOMOR URUTAN
                       Container(
-                        width: 52,
-                        height: 52,
+                        width: 42,
+                        height: 42,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: isCompleted
                               ? primaryGreen.withValues(alpha: 0.1)
                               : Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isCompleted
                                 ? primaryGreen.withValues(alpha: 0.3)
@@ -325,7 +458,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                             color: isCompleted
                                 ? primaryGreen
                                 : Colors.grey.shade700,
-                            fontSize: 20,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -345,7 +478,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
+                                  color: AppColors.mint.withValues(alpha: 0.18),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -353,7 +486,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade700,
+                                    color: AppColors.secondary,
                                   ),
                                 ),
                               ),
@@ -383,7 +516,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                                       fontWeight: FontWeight.bold,
                                       color: isCompleted
                                           ? primaryGreen
-                                          : Colors.orange.shade700,
+                                          : AppColors.tertiary,
                                     ),
                                   ),
                                 ],
@@ -397,14 +530,14 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                       // --- TOMBOL AR ---
                       // InkWell AR harus menangkap event kliknya sendiri
                       Material(
-                        color: Colors.blue.shade50,
+                        color: AppColors.mint.withValues(alpha: 0.18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: InkWell(
                           // Tambahkan hitTestBehavior agar klik tidak tembus ke bawah
                           hoverColor: Colors.transparent,
-                          splashColor: Colors.blue.shade100,
+                          splashColor: AppColors.mint.withValues(alpha: 0.3),
                           onTap: () {
                             HapticFeedback.selectionClick();
                             _openArCamera(context, module);
@@ -420,7 +553,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                               children: [
                                 Icon(
                                   Icons.view_in_ar_rounded,
-                                  color: Colors.blue.shade700,
+                                  color: AppColors.secondary,
                                   size: 22, // Ukuran ikon sedikit diperbesar
                                 ),
                                 const SizedBox(width: 6), // Jarak ikon dan teks
@@ -429,7 +562,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade800,
+                                    color: AppColors.secondary,
                                     letterSpacing: 0.3,
                                   ),
                                 ),
@@ -451,7 +584,7 @@ class _ModuleListScreenState extends State<ModuleListScreen>
               child: LinearProgressIndicator(
                 value: progressValue,
                 backgroundColor: Colors.grey.shade100,
-                color: isCompleted ? primaryGreen : Colors.orangeAccent,
+                color: isCompleted ? primaryGreen : AppColors.tertiaryContainer,
               ),
             ),
           ],

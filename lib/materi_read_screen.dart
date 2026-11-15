@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'config/api_config.dart';
 import 'services/app_services.dart';
+import 'theme/app_theme.dart';
 
 class MateriReadScreen extends StatefulWidget {
   final dynamic materi;
@@ -361,14 +362,14 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: isLevelUp
-                      ? Colors.orange.shade50
-                      : Colors.green.shade50,
+                      ? AppColors.xpBg
+                      : AppColors.mint.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   isLevelUp ? Icons.emoji_events_rounded : Icons.stars_rounded,
                   size: 64,
-                  color: isLevelUp ? Colors.orange : Colors.green,
+                  color: isLevelUp ? AppColors.tertiary : AppColors.primary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -438,7 +439,7 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
     final String kontenHtml = html.isEmpty ? '<p>Tidak ada konten.</p>' : html;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -491,7 +492,16 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
                   const SizedBox(height: 20),
 
                   if (isHtml)
-                    _buildHtmlContent(kontenHtml)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: _buildHtmlContent(kontenHtml),
+                    )
                   else
                     _buildMediaCard(tipe, primaryGreen),
                 ],
@@ -626,11 +636,11 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
       runSpacing: 8,
       children: [
         chip(icon, label),
-        if (htmlForEstimate != null)
-          chip(
-            Icons.schedule_rounded,
-            '${_estimateReadMinutes(htmlForEstimate)} menit baca',
-          ),
+        // if (htmlForEstimate != null)
+        //   chip(
+        //     Icons.schedule_rounded,
+        //     '${_estimateReadMinutes(htmlForEstimate)} menit baca',
+        //   ),
       ],
     );
   }
@@ -639,11 +649,11 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
   Widget _buildMediaCard(String tipe, Color primaryGreen) {
     final isVideo = tipe == 'video';
     final Color cardColor = isVideo
-        ? Colors.pink.shade50
-        : Colors.orange.shade50;
+        ? AppColors.mint.withValues(alpha: 0.18)
+        : AppColors.xpBg.withValues(alpha: 0.6);
     final Color iconColor = isVideo
-        ? Colors.pink.shade400
-        : Colors.orange.shade400;
+        ? AppColors.primaryContainer
+        : AppColors.tertiaryContainer;
     final IconData iconData = isVideo
         ? Icons.play_circle_fill_rounded
         : Icons.picture_as_pdf_rounded;
@@ -670,7 +680,7 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: isVideo ? Colors.pink.shade900 : Colors.orange.shade900,
+              color: isVideo ? AppColors.primary : AppColors.tertiary,
             ),
           ),
           const SizedBox(height: 8),
@@ -679,7 +689,7 @@ class _MateriReadScreenState extends State<MateriReadScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: isVideo ? Colors.pink.shade700 : Colors.orange.shade700,
+              color: isVideo ? AppColors.secondary : AppColors.tertiary,
             ),
           ),
           const SizedBox(height: 32),

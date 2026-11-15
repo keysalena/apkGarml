@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'module_detail_screen.dart';
 import 'services/app_services.dart';
+import 'theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen>
   int _xpTarget = 500;
   int _modulSelesai = 0;
   int _totalModul = 0;
+  String? _currentUserId;
   Map<String, dynamic>? _lastModule;
 
   // Variabel Leaderboard Baru
@@ -82,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen>
   void _applyData(Map<String, dynamic> d) {
     final user = d['user'] ?? {};
     _nama = user['nama'] ?? 'Pengguna';
+    _currentUserId = user['user_id']?.toString() ?? user['id']?.toString();
     _level = user['level'] ?? 1;
     _avatarUrl = user['avatar_url'];
     _xp = user['xp'] ?? 0;
@@ -99,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen>
   Future<void> _fetchHomeData({bool isManualRefresh = false}) async {
     // Abaikan cegatan jika ini adalah tarikan manual dari user
     if (_isFetching && !isManualRefresh) return;
-    
+
     _isFetching = true;
     try {
       final res = await ApiClient.get('/home');
@@ -143,9 +146,14 @@ class _HomeScreenState extends State<HomeScreen>
     final activeLeaderboard = _isGlobalLeaderboard
         ? _leaderboardGlobal
         : _leaderboardKelas;
+    final moduleProgress =
+        (((_lastModule?['progress'] as num?)?.toDouble() ?? 0.0).clamp(
+          0.0,
+          1.0,
+        )).toDouble();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primaryGreen))
           : RefreshIndicator(
@@ -156,24 +164,13 @@ class _HomeScreenState extends State<HomeScreen>
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 120),
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Stack(
                   children: [
-                    // --- HEADER HIJAU OVERLAP ---
-                    Container(
-                      height: 220,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(32),
-                        ),
-                      ),
-                    ),
                     SafeArea(
                       child: Column(
                         children: [
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           // --- IDENTITAS PENGGUNA ---
                           Padding(
@@ -181,44 +178,47 @@ class _HomeScreenState extends State<HomeScreen>
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: Colors.white24,
-                                  backgroundImage: resolveAvatarUrl(_avatarUrl) != null
-                                      ? NetworkImage(resolveAvatarUrl(_avatarUrl)!)
+                                  radius: 22,
+                                  backgroundColor: AppColors.mint.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  backgroundImage:
+                                      resolveAvatarUrl(_avatarUrl) != null
+                                      ? NetworkImage(
+                                          resolveAvatarUrl(_avatarUrl)!,
+                                        )
                                       : null,
                                   child: resolveAvatarUrl(_avatarUrl) != null
                                       ? null
                                       : Text(
                                           initialOf(_nama),
                                           style: const TextStyle(
-                                            color: Colors.white,
+                                            color: AppColors.primary,
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 22,
+                                            fontSize: 17,
                                           ),
                                         ),
                                 ),
-                                const SizedBox(width: 16),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Halo, ${_nama.split(' ')[0]}!',
+                                        'Halo, ${_nama.split(' ')[0]}! 👋',
                                         style: const TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: AppColors.textPrimary,
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
+                                      const SizedBox(height: 2),
+                                      const Text(
                                         'Siap belajar hari ini?',
                                         style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white.withValues(
-                                            alpha: 0.8,
-                                          ),
+                                          fontSize: 12,
+                                          color: AppColors.textMuted,
                                         ),
                                       ),
                                     ],
@@ -227,25 +227,28 @@ class _HomeScreenState extends State<HomeScreen>
                                 Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
-                                    vertical: 8,
+                                    vertical: 7,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(20),
+                                    color: AppColors.xpBg,
+                                    borderRadius: BorderRadius.circular(
+                                      AppRadius.full,
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
                                       const Icon(
                                         Icons.local_fire_department_rounded,
-                                        color: Colors.orangeAccent,
-                                        size: 20,
+                                        color: AppColors.tertiaryContainer,
+                                        size: 17,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         'Lv.$_level',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                          color: AppColors.tertiary,
+                                          fontSize: 12,
                                         ),
                                       ),
                                     ],
@@ -255,19 +258,33 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 18),
 
                           // --- KARTU LANJUTKAN BELAJAR ---
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24),
                             child: Container(
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.mint.withValues(alpha: 0.26),
+                                    AppColors.surface,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                ),
                                 borderRadius: BorderRadius.circular(24),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.08,
+                                    ),
                                     blurRadius: 24,
                                     offset: const Offset(0, 8),
                                   ),
@@ -280,35 +297,39 @@ class _HomeScreenState extends State<HomeScreen>
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text(
-                                        'Sedang Dipelajari',
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12,
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.mint.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            AppRadius.full,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _lastModule != null
+                                              ? 'Modul ${_lastModule!['urutan']} Sedang Berjalan'
+                                              : 'Mulai Belajar',
+                                          style: const TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                      if (_lastModule != null)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange.shade50,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Modul ${_lastModule!['urutan']}',
-                                            style: TextStyle(
-                                              color: Colors.orange.shade800,
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
+                                      // if (_lastModule != null)
+                                      //   Text(
+                                      //     '${(moduleProgress * 100).round()}%',
+                                      //     style: const TextStyle(
+                                      //       color: AppColors.textPrimary,
+                                      //       fontSize: 11,
+                                      //       fontWeight: FontWeight.bold,
+                                      //     ),
+                                      //   ),
                                     ],
                                   ),
                                   const SizedBox(height: 12),
@@ -327,10 +348,6 @@ class _HomeScreenState extends State<HomeScreen>
                                   if (_lastModule != null) ...[
                                     Builder(
                                       builder: (context) {
-                                        final double progVal =
-                                            (_lastModule!['progress'] as num?)
-                                                ?.toDouble() ??
-                                            0.0;
                                         return Column(
                                           children: [
                                             Row(
@@ -346,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                   ),
                                                 ),
                                                 Text(
-                                                  '${(progVal * 100).toInt()}%',
+                                                  '${(moduleProgress * 100).round()}%',
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.bold,
@@ -360,7 +377,7 @@ class _HomeScreenState extends State<HomeScreen>
                                               borderRadius:
                                                   BorderRadius.circular(10),
                                               child: LinearProgressIndicator(
-                                                value: progVal,
+                                                value: moduleProgress,
                                                 backgroundColor:
                                                     Colors.grey.shade200,
                                                 color: primaryGreen,
@@ -407,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen>
                                         ),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
-                                            12,
+                                            AppRadius.full,
                                           ),
                                         ),
                                       ),
@@ -436,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen>
                               children: [
                                 _buildStatCard(
                                   icon: Icons.stars_rounded,
-                                  iconColor: Colors.amber,
+                                  iconColor: AppColors.tertiaryContainer,
                                   title: 'Total XP',
                                   value: '$_xp',
                                   subtitle: '/$_xpTarget',
@@ -444,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 const SizedBox(width: 12),
                                 _buildStatCard(
                                   icon: Icons.menu_book_rounded,
-                                  iconColor: Colors.purpleAccent,
+                                  iconColor: AppColors.secondary,
                                   title: 'Modul',
                                   value: '$_modulSelesai',
                                   subtitle: '/$_totalModul',
@@ -452,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 const SizedBox(width: 12),
                                 _buildStatCard(
                                   icon: Icons.emoji_events_rounded,
-                                  iconColor: Colors.blueAccent,
+                                  iconColor: AppColors.primary,
                                   title: 'Rank',
                                   value: 'Lv.$_level',
                                   subtitle: '',
@@ -546,84 +563,168 @@ class _HomeScreenState extends State<HomeScreen>
                                             Divider(
                                               height: 1,
                                               color: Colors.grey.shade100,
-                                              indent: 64,
+                                              indent: 76,
                                               endIndent: 16,
                                             ),
                                         itemBuilder: (context, index) {
                                           final user = activeLeaderboard[index];
                                           final rank = index + 1;
+                                          final name =
+                                              (user['nama'] ?? 'Pengguna')
+                                                  .toString();
+                                          final userId =
+                                              user['user_id']?.toString() ??
+                                              user['id']?.toString();
+                                          final isCurrentUser =
+                                              user['is_current_user'] == true ||
+                                              (_currentUserId != null &&
+                                                  userId == _currentUserId);
 
-                                          Color rankColor =
-                                              Colors.grey.shade400;
-                                          if (rank == 1)
-                                            rankColor = Colors.amber;
-                                          if (rank == 2)
+                                          Color rankColor = AppColors.textMuted;
+                                          if (rank == 1) {
                                             rankColor =
-                                                Colors.blueGrey.shade300;
-                                          if (rank == 3)
-                                            rankColor = Colors.brown.shade400;
+                                                AppColors.tertiaryContainer;
+                                          }
+                                          if (rank == 2) {
+                                            rankColor = const Color(0xFFBCCAC0);
+                                          }
+                                          if (rank == 3) {
+                                            rankColor = AppColors.tertiary;
+                                          }
 
-                                          return ListTile(
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 4,
-                                                ),
-                                            leading: Container(
-                                              width: 44,
-                                              height: 44,
-                                              decoration: BoxDecoration(
-                                                color: rankColor.withValues(
-                                                  alpha: 0.15,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Center(
-                                                child: Text(
-                                                  '#$rank',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: rankColor,
-                                                    fontSize: 16,
+                                          return Container(
+                                            decoration: BoxDecoration(
+                                              color: isCurrentUser
+                                                  ? AppColors.mint.withValues(
+                                                      alpha: 0.26,
+                                                    )
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(14),
+                                            ),
+                                            child: ListTile(
+                                              dense: true,
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
                                                   ),
+                                              leading: SizedBox(
+                                                width: 36,
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    if (rank == 1)
+                                                      const Text(
+                                                        '👑',
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          height: 1,
+                                                        ),
+                                                      ),
+                                                    Container(
+                                                      width: 32,
+                                                      height: 32,
+                                                      decoration: BoxDecoration(
+                                                        color: rankColor
+                                                            .withValues(
+                                                              alpha: 0.15,
+                                                            ),
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          '$rank',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: rankColor,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                            ),
-                                            title: Text(
-                                              user['nama'],
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                                color: Colors.black87,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            subtitle: Text(
-                                              'Level ${user['level']}',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade500,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            trailing: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  Icons.stars_rounded,
-                                                  color: Colors.amber.shade400,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  '${user['xp']}',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black87,
-                                                    fontSize: 15,
+                                              title: Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      name,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 13,
+                                                        color: AppColors
+                                                            .textPrimary,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
                                                   ),
+                                                  if (isCurrentUser) ...[
+                                                    const SizedBox(width: 5),
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 6,
+                                                            vertical: 2,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color:
+                                                            AppColors.primary,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              AppRadius.full,
+                                                            ),
+                                                      ),
+                                                      child: const Text(
+                                                        'Kamu',
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 9,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                              subtitle: Text(
+                                                'Level ${user['level'] ?? 1}',
+                                                style: const TextStyle(
+                                                  color: AppColors.textMuted,
+                                                  fontSize: 11,
                                                 ),
-                                              ],
+                                              ),
+                                              trailing: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    '${user['xp'] ?? 0}',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color:
+                                                          AppColors.textPrimary,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 3),
+                                                  const Text(
+                                                    'XP',
+                                                    style: TextStyle(
+                                                      color:
+                                                          AppColors.textMuted,
+                                                      fontSize: 9,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           );
                                         },

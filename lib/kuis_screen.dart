@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'services/app_services.dart';
+import 'theme/app_theme.dart';
 
 class KuisScreen extends StatefulWidget {
   final String moduleId;
@@ -119,8 +120,8 @@ class _KuisScreenState extends State<KuisScreen> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: isLevelUp
-                      ? Colors.orange.shade50
-                      : Colors.blue.shade50,
+                      ? AppColors.xpBg
+                      : AppColors.mint.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -128,7 +129,7 @@ class _KuisScreenState extends State<KuisScreen> {
                       ? Icons.emoji_events_rounded
                       : Icons.military_tech_rounded,
                   size: 64,
-                  color: isLevelUp ? Colors.orange : Colors.blue.shade700,
+                  color: isLevelUp ? AppColors.tertiary : AppColors.primary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -181,14 +182,17 @@ class _KuisScreenState extends State<KuisScreen> {
       },
     );
   }
-Future<bool> _onWillPop() async {
+
+  Future<bool> _onWillPop() async {
     HapticFeedback.lightImpact();
     final bool? shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           title: const Text(
             'Keluar dari Kuis?',
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -210,8 +214,8 @@ Future<bool> _onWillPop() async {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true), // Ya, keluar
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade50,
-                foregroundColor: Colors.red,
+                backgroundColor: AppColors.errorContainer,
+                foregroundColor: AppColors.error,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -229,9 +233,9 @@ Future<bool> _onWillPop() async {
 
     // Mengembalikan nilai true jika user memilih "Ya, Keluar" (boleh pop)
     // Mengembalikan nilai false jika user memilih "Lanjutkan Kuis" atau menutup dialog
-    return shouldPop ?? false; 
+    return shouldPop ?? false;
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final primaryGreen = Theme.of(context).primaryColor;
@@ -261,7 +265,7 @@ Future<bool> _onWillPop() async {
       },
       // 2. Scaffold ASLI ANDA SEBELUMNYA MENJADI child DARI PopScope
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
@@ -312,16 +316,40 @@ Future<bool> _onWillPop() async {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    soal['pertanyaan'] ?? 'Pertanyaan tidak tersedia',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      height: 1.5,
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'PERTANYAAN ${index + 1}',
+                          style: TextStyle(
+                            color: primaryGreen,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          soal['pertanyaan'] ?? 'Pertanyaan tidak tersedia',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
 
                   // Looping data opsi secara otomatis
                   if (optionsList.isNotEmpty)

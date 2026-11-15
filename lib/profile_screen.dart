@@ -5,6 +5,7 @@ import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
 import 'help_center_screen.dart';
 import 'services/app_services.dart';
+import 'theme/app_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -187,8 +188,8 @@ class _ProfileScreenState extends State<ProfileScreen>
               _forceLogout();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red.shade50,
-              foregroundColor: Colors.red,
+              backgroundColor: AppColors.errorContainer,
+              foregroundColor: AppColors.error,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -210,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     final primaryGreen = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primaryGreen))
           : RefreshIndicator(
@@ -220,48 +221,25 @@ class _ProfileScreenState extends State<ProfileScreen>
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 120),
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Stack(
                   children: [
-                    Container(
-                      height: 240,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: primaryGreen,
-                        borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(32),
-                        ),
-                      ),
-                    ),
                     SafeArea(
                       child: Column(
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(24, 20, 24, 20),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Profil Saya',
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
                             child: Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(24),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: AppColors.cardBorder),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.06),
-                                    blurRadius: 24,
+                                    color: AppColors.cardShadow,
+                                    blurRadius: 18,
                                     offset: const Offset(0, 8),
                                   ),
                                 ],
@@ -373,12 +351,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Colors.orange.shade50,
+                                          color: AppColors.xpBg,
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
                                           border: Border.all(
-                                            color: Colors.orange.shade200,
+                                            color: AppColors.tertiaryContainer,
                                           ),
                                         ),
                                         child: Row(
@@ -386,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                             Icon(
                                               Icons.school_rounded,
                                               size: 14,
-                                              color: Colors.orange.shade700,
+                                              color: AppColors.tertiary,
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
@@ -394,7 +372,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.orange.shade800,
+                                                color: AppColors.tertiary,
                                               ),
                                             ),
                                           ],
@@ -452,7 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                     children: [
                                       _buildMenuTile(
                                         icon: Icons.person_outline_rounded,
-                                        iconColor: Colors.blue,
+                                        iconColor: AppColors.secondary,
                                         title: 'Edit Profil',
                                         onTap: () {
                                           HapticFeedback.selectionClick();
@@ -476,7 +454,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       _buildDivider(),
                                       _buildMenuTile(
                                         icon: Icons.lock_outline_rounded,
-                                        iconColor: Colors.orange,
+                                        iconColor: AppColors.tertiaryContainer,
                                         title: 'Ubah Kata Sandi',
                                         onTap: () {
                                           HapticFeedback.selectionClick();
@@ -527,9 +505,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                                   ),
                                   child: _buildMenuTile(
                                     icon: Icons.logout_rounded,
-                                    iconColor: Colors.red,
+                                    iconColor: AppColors.error,
                                     title: 'Keluar Akun',
-                                    textColor: Colors.red,
+                                    textColor: AppColors.error,
                                     hideArrow: true,
                                     onTap: _showLogoutDialog,
                                   ),

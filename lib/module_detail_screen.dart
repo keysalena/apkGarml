@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -6,6 +5,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'services/app_services.dart';
 import 'kuis_screen.dart';
 import 'materi_read_screen.dart';
+import 'theme/app_theme.dart';
 
 class ModuleDetailScreen extends StatefulWidget {
   final String moduleId;
@@ -66,7 +66,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
   Future<void> _fetchModuleDetail({bool isManualRefresh = false}) async {
     // Abaikan cegatan jika user menarik layar secara manual
     if (_isFetching && !isManualRefresh) return;
-    
+
     _isFetching = true;
     try {
       final res = await ApiClient.get('/modules/${widget.moduleId}');
@@ -115,7 +115,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
     final primaryGreen = Theme.of(context).primaryColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -155,10 +155,10 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
+                          color: primaryGreen.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.blue.shade200,
+                            color: primaryGreen.withValues(alpha: 0.18),
                             width: 1.5,
                           ),
                         ),
@@ -169,7 +169,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                               children: [
                                 Icon(
                                   Icons.rocket_launch_rounded,
-                                  color: Colors.blue.shade700,
+                                  color: primaryGreen,
                                   size: 24,
                                 ),
                                 const SizedBox(width: 10),
@@ -179,7 +179,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.blue.shade800,
+                                      color: primaryGreen,
                                     ),
                                   ),
                                 ),
@@ -359,8 +359,10 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                                           ]
                                         : (allMateriCompleted
                                               ? [
-                                                  Colors.orange.shade400,
-                                                  Colors.deepOrange.shade400,
+                                                  primaryGreen,
+                                                  primaryGreen.withValues(
+                                                    alpha: 0.75,
+                                                  ),
                                                 ]
                                               : [
                                                   Colors.grey.shade400,
@@ -373,8 +375,8 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                                   boxShadow: [
                                     if (allMateriCompleted && !_isKuisSelesai)
                                       BoxShadow(
-                                        color: Colors.orange.withValues(
-                                          alpha: 0.3,
+                                        color: primaryGreen.withValues(
+                                          alpha: 0.22,
                                         ),
                                         blurRadius: 16,
                                         offset: const Offset(0, 8),
@@ -454,11 +456,11 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                                             20,
                                           ),
                                         ),
-                                        child: const Text(
+                                        child: Text(
                                           'Mulai',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.deepOrange,
+                                            color: primaryGreen,
                                           ),
                                         ),
                                       ),
@@ -547,7 +549,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                         ? primaryGreen
                         : (isLocked
                               ? Colors.grey.shade300
-                              : Colors.blue.shade50),
+                              : AppColors.mint.withValues(alpha: 0.18)),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -556,7 +558,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                         ? Colors.white
                         : (isLocked
                               ? Colors.grey.shade500
-                              : Colors.blue.shade700),
+                              : AppColors.secondary),
                     size: 24,
                   ),
                 ),
@@ -572,7 +574,7 @@ class _ModuleDetailScreenState extends State<ModuleDetailScreen> {
                           fontWeight: FontWeight.bold,
                           color: isLocked
                               ? Colors.grey.shade500
-                              : Colors.blue.shade700,
+                              : AppColors.secondary,
                         ),
                       ),
                       const SizedBox(height: 4),

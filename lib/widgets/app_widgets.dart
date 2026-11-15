@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../theme/app_theme.dart';
 
 /// ================================================================
@@ -385,7 +386,11 @@ class GradientPageHeader extends StatelessWidget {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Positioned(right: -30, top: -30, child: DecorativeCircle(size: 100)),
+            Positioned(
+              right: -30,
+              top: -30,
+              child: DecorativeCircle(size: 100),
+            ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -394,11 +399,17 @@ class GradientPageHeader extends StatelessWidget {
                     if (showBack)
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                        icon: const Icon(
+                          Icons.arrow_back_rounded,
+                          color: Colors.white,
+                        ),
                       )
                     else
                       const SizedBox(width: 12),
-                    if (leading != null) ...[leading!, const SizedBox(width: 12)],
+                    if (leading != null) ...[
+                      leading!,
+                      const SizedBox(width: 12),
+                    ],
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +477,8 @@ class GradientCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradientColors =
-        colors ?? [AppColors.primary, AppColors.primary.withValues(alpha: 0.75)];
+        colors ??
+        [AppColors.primary, AppColors.primary.withValues(alpha: 0.75)];
     return Container(
       padding: padding,
       decoration: BoxDecoration(
