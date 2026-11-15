@@ -1,0 +1,33 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"> <!-- 1. Tambahkan baris tools ini -->
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+
+<uses-feature android:name="android.hardware.camera" android:required="false"/>
+<uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    
+    <queries>
+        <!-- Mengizinkan aplikasi membuka link internet (https) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <!-- Mengizinkan aplikasi membuka link internet (http) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+    </queries>
+    <!-- ======================== -->
+
+    <application
+        android:label="GARML"
+        android:name="${applicationName}"
+        tools:replace="android:label"> <!-- 2. Ubah ikon dan tambahkan baris tools:replace ini -->
+        
+        <!-- ... (biarkan sisa kode activity bawaan flutter di bawah sini) ... -->
+        
+    </application>
+</manifest>
